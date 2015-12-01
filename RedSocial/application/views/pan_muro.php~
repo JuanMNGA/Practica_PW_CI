@@ -1,0 +1,8 @@
+	<ul class="nav nav-tabs nav-justified">
+		<li role="presentation" class="active"> <a href="#"> Todo </a> </li>
+		<li role="presentation"> <a href="#"> Amigos </a> </li>
+		<li role="presentation"> <a href="#"> Asociaciones </a> </li>
+		<li role="presentation"> <a href="#"> Tiendas </a> </li>
+		<li role="presentation"> <a href="#"> Interés </a> </li>
+	</ul>
+</div>

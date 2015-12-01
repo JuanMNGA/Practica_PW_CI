@@ -1,0 +1,189 @@
+<?php
+
+class Usuario_model extends CI_Model
+{
+    
+    var $details;
+    
+    function validate_user($email, $password){
+        // Build a query to retrieve the user's details
+        // based on the received username and password
+        $this->db->from('usuario');
+        $this->db->where('email', $email);
+        $query = $this->db->get();
+                
+        // If one row is returned
+        if ($query->num_rows() == 1) {
+			// Check if password is correct
+			$user = $query->row();
+            $hash = $this->checkhashSSHA($user->salt, $password);
+            // check for password equality
+            if ($user->password == $hash) {
+                // user authentication details are correct
+				// Set the users details into the $details property of this class
+				$this->details = $user;
+				// Call set_session to set the user's session vars via CodeIgniter
+				$this->set_session();
+				return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    function set_session(){
+        // session->set_userdata is a CodeIgniter function that
+        // stores data in CodeIgniter's session storage.  Some of the values are built in
+        // to CodeIgniter, others are added.  See CodeIgniter's documentation for details.
+        $this->session->set_userdata(array(
+            'id' => $this->details->id,
+            'nombre' => $this->details->firstName . ' ' . $this->details->lastName,
+            'email' => $this->details->email,
+            'isLoggedIn' => true
+        ));
+    }
+    
+     // Encrypting password
+     // returns salt and encrypted password
+     
+    public function hashSSHA($password) {
+        $salt = sha1(rand());
+        $salt = substr($salt, 0, 10);
+        $encrypted = base64_encode(sha1($password . $salt, true) . $salt);
+        $hash = array("salt" => $salt, "encrypted" => $encrypted);
+        return $hash;
+    }
+    
+    private function checkhashSSHA($salt, $password) {
+        $hash = base64_encode(sha1($password . $salt, true) . $salt);
+        return $hash;
+    }
+    
+    // CRUD
+    /**
+    * Fetch users data from the database
+    * possibility to mix search, filter and order
+    * @param int $manufacuture_id 
+    * @param string $search_string 
+    * @param strong $order
+    * @param string $order_type 
+    * @param int $limit_start
+    * @param int $limit_end
+    * @return array
+    */
+    public function get_users($search_string=null, $order=null, $order_type='Asc', $limit_start, $limit_end)
+    {	    
+		$this->db->select('usuario4.id');
+		$this->db->select('usuario4.nombre');
+		$this->db->select('usuario4.email');
+		$this->db->select('usuario4.fecha_alta');
+		$this->db->from('usuario4');
+		
+		if($search_string){
+			$this->db->like('nombre', $search_string);
+			$this->db->or_like('email', $search_string);
+		}
+
+		if($order){
+			$this->db->order_by($order, $order_type);
+		}else{
+			$this->db->order_by('nombre', $order_type);
+		}
+
+		$this->db->limit($limit_start, $limit_end);
+
+		$query = $this->db->get();
+		
+		return $query->result_array(); 	
+    }
+    
+    /**
+    * Count the number of rows
+    * @param int $search_string
+    * @param int $order
+    * @return int
+    */
+    function count_users($search_string=null, $order=null)
+    {
+		$this->db->select('*');
+		$this->db->from('usuario4');
+		
+		if($search_string){
+			$this->db->like('nombre', $search_string);
+			$this->db->or_like('email', $search_string);
+		}
+		if($order){
+			$this->db->order_by($order, 'Asc');
+		}else{
+		    $this->db->order_by('nombre', 'Asc');
+		}
+		$query = $this->db->get();
+		return $query->num_rows();        
+    }
+    
+    /**
+    * Get user by his id
+    * @param string $id
+    * @return array
+    */
+    public function get_user_by_id($id){
+		$this->db->select('nombre');
+		$this->db->select('email');
+		$this->db->select('password');
+		$this->db->select('salt');
+		$this->db->from('usuario4');
+		$this->db->where('id', $id);
+		$query = $this->db->get();
+		return $query->result_array(); 
+    }
+    
+    public function get_user_by_email($email){
+		$this->db->select('nombre');
+		$this->db->select('id');
+		$this->db->from('usuario4');
+		$this->db->where('email', $email);
+		$query = $this->db->get();
+		return $query->result_array(); 
+    }
+    
+    /**
+    * Update user
+    * @param array $data - associative array with data to store
+    * @return boolean
+    */
+    	function update_user($id, $data){
+		$this->db->where('id', $id);
+		$this->db->update('usuario4', $data);
+		$report = array();
+		$report['error'] = $this->db->_error_number();
+		$report['message'] = $this->db->_error_message();
+		if($report !== 0){
+			return true;
+		}else{
+			return false;
+		}
+	}
+    
+    /**
+    * Delete user
+    * @param int $id - user id
+    * @return boolean
+    */
+	function delete_user($id){
+		
+		echo $id;
+		
+		$this->db->where('id', $id);
+		$this->db->delete('usuario4'); 
+	}
+	
+	/**
+    * Store the new user into the database
+    * @param array $data - associative array with data to store
+    * @return boolean 
+    */
+    	function store_user($data){
+		$insert = $this->db->insert('usuario', $data);
+	    	return $insert;
+	}
+}

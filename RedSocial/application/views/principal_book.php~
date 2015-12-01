@@ -1,0 +1,16 @@
+
+<div class="row">
+	<div class="col-md-2" align="center"> col-md-2 </div> <!-- Controles usuario -->
+	<div class="col-md-7" align="center">
+		<ul class="nav nav-tabs nav-justified">
+			<li role="presentation" class="active"> <a href="#"> Interés </a> </li>
+			<li role="presentation"> <a href="#"> Asociaciones </a> </li>
+			<li role="presentation"> <a href="#"> Tiendas </a> </li>
+			<li role="presentation"> <a href="#"> Todo </a> </li>
+		</ul>
+	</div> <!-- Muro -->
+	<div class="col-md-3" align="center"> col-md-3 </div> <!-- Calendario / Noticias -->
+</div> <!-- Cerramos el row -->
+
+</body>
+</html>
